@@ -1,18 +1,21 @@
 using System;
-using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor.Overlays;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 [Serializable]
-public class _UserData {
+public class _LoginData {
+    public string url = "";
     public string id = "";
 }
+
 [Serializable]
 public class _SaveData {
     public string saveKey = "";
-    public Dictionary<string, _UserData> loginData = new Dictionary<string, _UserData>();
+    public List<_LoginData> loginData = new List<_LoginData>();
 }
+
 public static class SaveManager {
     static string saveKey = "test001";
     static _SaveData saveData;
@@ -27,30 +30,43 @@ public static class SaveManager {
         saveData = null;
         if (File.Exists(savePath)) {
             string json = File.ReadAllText(savePath);
+            Debug.Log(json);
             saveData = JsonUtility.FromJson<_SaveData>(json);
         }
 
-
-        if (saveData == null || saveData.saveKey != saveKey) saveData = new _SaveData();
+        if (saveData == null || saveData.saveKey != saveKey) { saveData = new _SaveData(); }
 
         return saveData;
     }
 
-    public static void Save(_SaveData data) {
-        data.saveKey = saveKey;
-        string json = JsonUtility.ToJson(data, true);
+    public static void Save() {
+        saveData.saveKey = saveKey;
+        string json = JsonUtility.ToJson(saveData, true);
+        Debug.Log(json);
         File.WriteAllText(savePath, json);
     }
 
-    public static _UserData GetUserDataByURL(string url) {
+    public static string GetUserIDByURL(string url) {
         if (saveData == null) return null;
 
-        if (saveData.loginData.ContainsKey(url)) {
-            return saveData.loginData[url];
-        } else {
-            _UserData data = new _UserData();
-            saveData.loginData.Add(url, data);
-            return data;
+        for (int i = 0, len = saveData.loginData.Count; i < len; ++i) {
+            if (saveData.loginData[i].url == url) return saveData.loginData[i].id;
         }
+        return "";
+    }
+
+    public static void SetUserIDByURL(string url, string id) {
+        if (saveData == null) return;
+
+        for (int i = 0, len = saveData.loginData.Count; i < len; ++i) {
+            if (saveData.loginData[i].url == url) {
+                saveData.loginData[i].id = id;
+                return;
+            }
+        }
+        saveData.loginData.Add(new _LoginData{ 
+            url = url,
+            id = id
+        });
     }
 }

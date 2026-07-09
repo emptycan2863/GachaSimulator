@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using static UnityEngine.Audio.ProcessorInstance;
 
 public class LoginManager : MonoBehaviour {
     private static LoginManager _instance;
@@ -99,6 +101,11 @@ public class LoginManager : MonoBehaviour {
             tmpIfList[i].interactable = false;
         }
 
+        string url = "http://" + tmpIfList[index].text;
+        string loginUrl = url + "/login";
+        string idLoginUrl = loginUrl + "/idLogin";
+        string signinUrl = loginUrl + "/signIn";
+
         try {
             yield return new WaitUntil(() => !isServerLoading[index]);
 
@@ -110,10 +117,79 @@ public class LoginManager : MonoBehaviour {
             }
 
             string serverUrl = tmpIfList[index].text;
-            _UserData user = SaveManager.GetUserDataByURL(serverUrl);
+            string userID = SaveManager.GetUserIDByURL(serverUrl);
 
-            if (user.id == "") {
-            } else { 
+            if (userID == "") {
+                UnityWebRequest signinRequest = null;
+                try {
+                    signinRequest = new UnityWebRequest(signinUrl, "POST");
+                    signinRequest.downloadHandler = new DownloadHandlerBuffer();
+                    signinRequest.timeout = 5;
+                } catch (Exception e) {
+                    Debug.LogWarning("계정 생성 실패. URL: " + url + ", error: " + e.Message);
+                    yield break;
+                }
+
+                yield return signinRequest.SendWebRequest();
+
+                if (signinRequest.result != UnityWebRequest.Result.Success) {
+                    Debug.LogWarning("계정 생성 실패. URL: " + idLoginUrl + ", error: " + signinRequest.error);
+                    yield break;
+                }
+
+                string signinResponseJson = signinRequest.downloadHandler.text;
+
+                LoginResponse signinResponse = JsonUtility.FromJson<LoginResponse>(signinResponseJson);
+
+                if (signinResponse == null || !signinResponse.success || signinResponse.user == null) {
+                    Debug.Log("계정 생성 실패");
+                    yield break;
+                }
+
+                userID = signinResponse.id;
+                Debug.Log("계정 생성 성공: " + signinResponse.user);
+
+            }
+
+            IdLoginRequest loginRequest = new IdLoginRequest {
+                id = userID
+            };
+
+            string requestJson = JsonUtility.ToJson(loginRequest);
+
+            UnityWebRequest idLoginRequest = null;
+
+            try {
+                idLoginRequest = UnityWebRequest.Post(idLoginUrl, requestJson, "application/json");
+                idLoginRequest.timeout = 5;
+            } catch (Exception e) {
+                Debug.LogWarning("로그인 실패. URL: " + url + ", error: " + e.Message);
+                yield break;
+            }
+
+            try {
+                yield return idLoginRequest.SendWebRequest();
+
+                if (idLoginRequest.result != UnityWebRequest.Result.Success) {
+                    Debug.LogWarning("로그인 요청 실패. URL: " + idLoginUrl + ", error: " + idLoginRequest.error);
+                    yield break;
+                }
+
+                string loginResponseJson = idLoginRequest.downloadHandler.text;
+
+                LoginResponse loginResponse = JsonUtility.FromJson<LoginResponse>(loginResponseJson);
+
+                if (loginResponse == null || !loginResponse.success || loginResponse.user == null) {
+                    Debug.Log("로그인 실패");
+                    yield break;
+                }
+
+                Debug.Log("로그인 성공: " + loginResponse.user);
+
+                SaveManager.SetUserIDByURL(serverUrl, userID);
+            } finally {
+                idLoginRequest?.Dispose();
+                SaveManager.Save();
             }
         } finally {
             GameManager.blockButton = false;

@@ -1,14 +1,18 @@
+using System;
+
+[Serializable]
 public class IdLoginRequest {
-    public string id { get; set; } = "";
+    public string id = "";
 }
 
-public class IdLoginResponse {
-    public bool success { get; set; }
-    public string message { get; set; } = "";
-    public UserInfo? user { get; set; }
+[Serializable]
+public class LoginResponse {
+    public bool success;
+    public string id;
+    public UserInfo user;
 }
 
+[Serializable]
 public class UserInfo {
-    public string id { get; set; } = "";
-    public string name { get; set; } = "";
+    public string id = "";
 }
