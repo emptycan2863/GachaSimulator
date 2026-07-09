@@ -18,6 +18,7 @@ public class LoginManager : MonoBehaviour {
 
     private List<TMP_InputField> tmpIfList = new List<TMP_InputField>();
     private List<bool> isServerLoading = new List<bool>();
+    private List<bool> isServerActive = new List<bool>();
 
     private void Awake() {
         _instance = this;
@@ -29,6 +30,7 @@ public class LoginManager : MonoBehaviour {
             TMP_InputField tmpIf = serverURL_textBox[i].GetComponent<TMP_InputField>();
             tmpIfList.Add(tmpIf);
             isServerLoading.Add(false);
+            isServerActive.Add(false);
             tmpIf.text = serverURL[i] + ":" + port;
             tmpIf.onEndEdit.AddListener((t) => {
                 StartCoroutine(ServerActiveCheck(_i));
@@ -49,12 +51,13 @@ public class LoginManager : MonoBehaviour {
     private IEnumerator ServerActiveCheck(int index) {
         if (serverURL_textBox.Length <= index) yield break;
         if (isServerLoading[index]) yield break;
+        isServerActive[index] = false;
         isServerLoading[index] = true;
         string serverUrl = tmpIfList[index].text;
         string url = "http://" + serverUrl + "/serverActive";
         serverStatus[index].GetComponent<Image>().color = new Color(1, 1, 0, 1);
 
-        UnityWebRequest request;
+        UnityWebRequest request = null;
         try {
             request = UnityWebRequest.Get(url);
             request.timeout = 2;
@@ -70,13 +73,14 @@ public class LoginManager : MonoBehaviour {
 
             if (request.result == UnityWebRequest.Result.Success) {
                 serverStatus[index].GetComponent<Image>().color = new Color(0, 1, 0, 1);
+                isServerActive[index] = true;
             } else {
                 Debug.LogWarning("서버 호출 실패. URL: " + url + ", error: " + request.error);
                 serverStatus[index].GetComponent<Image>().color = new Color(1, 0, 0, 1);
             }
         } finally {
             isServerLoading[index] = false;
-            request.Dispose();
+            request?.Dispose();
         }
     }
 
@@ -90,8 +94,28 @@ public class LoginManager : MonoBehaviour {
     }
 
     private IEnumerator ServerLoginRun(int index) {
-        string serverUrl = "http://" + tmpIfList[index].text;
+        GameManager.blockButton = true;
+        tmpIfList[index].interactable = false;
 
-        yield return 0;
+        try {
+            yield return new WaitUntil(() => !isServerLoading[index]);
+
+            yield return StartCoroutine(ServerActiveCheck(index));
+
+            if (!isServerActive[index]) {
+                Debug.Log("로그인 실패");
+                yield break;
+            }
+
+            string serverUrl = tmpIfList[index].text;
+            _UserData user = SaveManager.GetUserDataByURL(serverUrl);
+
+            if (user.id == "") {
+            } else { 
+            }
+        } finally {
+            GameManager.blockButton = false;
+            tmpIfList[index].interactable = true;
+        }
     }
 }

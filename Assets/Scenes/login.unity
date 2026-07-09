@@ -829,7 +829,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 383776898}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 383776900}
+        m_TargetAssemblyTypeName: LoginButton, Assembly-CSharp
+        m_MethodName: Click
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &383776898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -880,6 +892,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae5c0284742556a4d9fe510af2fb80a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoginButton
+  index: 1
 --- !u!1 &440033232
 GameObject:
   m_ObjectHideFlags: 0
@@ -1952,7 +1965,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1399595361}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1399595364}
+        m_TargetAssemblyTypeName: LoginButton, Assembly-CSharp
+        m_MethodName: Click
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1399595364
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1965,6 +1990,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae5c0284742556a4d9fe510af2fb80a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoginButton
+  index: 0
 --- !u!1 &1426701968
 GameObject:
   m_ObjectHideFlags: 0
