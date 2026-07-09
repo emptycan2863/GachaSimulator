@@ -95,7 +95,9 @@ public class LoginManager : MonoBehaviour {
 
     private IEnumerator ServerLoginRun(int index) {
         GameManager.blockButton = true;
-        tmpIfList[index].interactable = false;
+        for (int i = 0, len = tmpIfList.Count; i < len; ++i) {
+            tmpIfList[i].interactable = false;
+        }
 
         try {
             yield return new WaitUntil(() => !isServerLoading[index]);
@@ -115,7 +117,9 @@ public class LoginManager : MonoBehaviour {
             }
         } finally {
             GameManager.blockButton = false;
-            tmpIfList[index].interactable = true;
+            for (int i = 0, len = tmpIfList.Count; i < len; ++i) {
+                tmpIfList[i].interactable = true;
+            }
         }
     }
 }
