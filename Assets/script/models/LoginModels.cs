@@ -11,8 +11,3 @@ public class LoginResponse {
     public string id;
     public UserInfo user;
 }
-
-[Serializable]
-public class UserInfo {
-    public string id = "";
-}

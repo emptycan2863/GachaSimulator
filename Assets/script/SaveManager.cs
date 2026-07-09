@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [Serializable]
 public class _LoginData {
@@ -30,7 +29,6 @@ public static class SaveManager {
         saveData = null;
         if (File.Exists(savePath)) {
             string json = File.ReadAllText(savePath);
-            Debug.Log(json);
             saveData = JsonUtility.FromJson<_SaveData>(json);
         }
 

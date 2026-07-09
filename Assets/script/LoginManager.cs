@@ -1,12 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
-using static UnityEngine.Audio.ProcessorInstance;
 
 public class LoginManager : MonoBehaviour {
     private static LoginManager _instance;
@@ -56,7 +54,7 @@ public class LoginManager : MonoBehaviour {
         isServerActive[index] = false;
         isServerLoading[index] = true;
         string serverUrl = tmpIfList[index].text;
-        string url = "http://" + serverUrl + "/serverActive";
+        string url = "http://" + serverUrl + "/health";
         serverStatus[index].GetComponent<Image>().color = new Color(1, 1, 0, 1);
 
         UnityWebRequest request = null;
@@ -101,8 +99,9 @@ public class LoginManager : MonoBehaviour {
             tmpIfList[i].interactable = false;
         }
 
-        string url = "http://" + tmpIfList[index].text;
-        string loginUrl = url + "/login";
+        string serverUrl = tmpIfList[index].text;
+        string httpUrl = "http://" + serverUrl;
+        string loginUrl = httpUrl + "/login";
         string idLoginUrl = loginUrl + "/idLogin";
         string signinUrl = loginUrl + "/signIn";
 
@@ -116,7 +115,6 @@ public class LoginManager : MonoBehaviour {
                 yield break;
             }
 
-            string serverUrl = tmpIfList[index].text;
             string userID = SaveManager.GetUserIDByURL(serverUrl);
 
             if (userID == "") {
@@ -126,7 +124,7 @@ public class LoginManager : MonoBehaviour {
                     signinRequest.downloadHandler = new DownloadHandlerBuffer();
                     signinRequest.timeout = 5;
                 } catch (Exception e) {
-                    Debug.LogWarning("계정 생성 실패. URL: " + url + ", error: " + e.Message);
+                    Debug.LogWarning("계정 생성 실패. URL: " + httpUrl + ", error: " + e.Message);
                     yield break;
                 }
 
@@ -154,7 +152,6 @@ public class LoginManager : MonoBehaviour {
             IdLoginRequest loginRequest = new IdLoginRequest {
                 id = userID
             };
-
             string requestJson = JsonUtility.ToJson(loginRequest);
 
             UnityWebRequest idLoginRequest = null;
@@ -163,7 +160,7 @@ public class LoginManager : MonoBehaviour {
                 idLoginRequest = UnityWebRequest.Post(idLoginUrl, requestJson, "application/json");
                 idLoginRequest.timeout = 5;
             } catch (Exception e) {
-                Debug.LogWarning("로그인 실패. URL: " + url + ", error: " + e.Message);
+                Debug.LogWarning("로그인 실패. URL: " + httpUrl + ", error: " + e.Message);
                 yield break;
             }
 
@@ -185,8 +182,7 @@ public class LoginManager : MonoBehaviour {
                 }
 
                 Debug.Log("로그인 성공: " + loginResponse.user);
-
-                SaveManager.SetUserIDByURL(serverUrl, userID);
+                GameManager.Login(serverUrl, userID);
             } finally {
                 idLoginRequest?.Dispose();
                 SaveManager.Save();
