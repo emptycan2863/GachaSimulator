@@ -135,6 +135,8 @@ public class GameManager : MonoBehaviour {
                 DisconnectToLogin();
                 yield break;
             }
+
+            Debug.LogWarning("5초 주기 핑");
         } finally {
             isPingLoading = false;
             request?.Dispose();
